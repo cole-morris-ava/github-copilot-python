@@ -9,13 +9,20 @@ CURRENT = {
     'solution': None
 }
 
+DIFFICULTY_CLUES = {
+    'easy': 40,
+    'medium': 35,
+    'hard': 30
+}
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/new')
 def new_game():
-    clues = int(request.args.get('clues', 35))
+    difficulty = request.args.get('difficulty', 'medium').lower()
+    clues = DIFFICULTY_CLUES.get(difficulty, DIFFICULTY_CLUES['medium'])
     puzzle, solution = sudoku_logic.generate_puzzle(clues)
     CURRENT['puzzle'] = puzzle
     CURRENT['solution'] = solution
