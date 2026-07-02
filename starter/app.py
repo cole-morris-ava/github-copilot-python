@@ -42,5 +42,23 @@ def check_solution():
                 incorrect.append([i, j])
     return jsonify({'incorrect': incorrect})
 
+@app.route('/hint')
+def hint():
+    row = request.args.get('row')
+    col = request.args.get('col')
+    solution = CURRENT.get('solution')
+    if solution is None:
+        return jsonify({'error': 'No game in progress'}), 400
+    if row is None or col is None:
+        return jsonify({'error': 'Missing row or col'}), 400
+    try:
+        row = int(row)
+        col = int(col)
+    except ValueError:
+        return jsonify({'error': 'Invalid row or col'}), 400
+    if not (0 <= row < sudoku_logic.SIZE and 0 <= col < sudoku_logic.SIZE):
+        return jsonify({'error': 'Row or col out of range'}), 400
+    return jsonify({'value': solution[row][col]})
+
 if __name__ == '__main__':
     app.run(debug=True)

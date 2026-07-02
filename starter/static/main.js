@@ -119,12 +119,48 @@ async function checkSolution() {
   }
 }
 
+async function requestHint(row, col) {
+  const res = await fetch(`/hint?row=${row}&col=${col}`);
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to retrieve a hint');
+  }
+  return data;
+}
+
+async function applyHint() {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = Array.from(boardDiv.getElementsByTagName('input'));
+  const blankInputs = inputs.filter(inp => !inp.disabled && inp.value.trim() === '');
+  const msg = document.getElementById('message');
+  if (blankInputs.length === 0) {
+    msg.className = 'error';
+    msg.innerText = 'No empty cells remain for a hint.';
+    return;
+  }
+  const chosenInput = blankInputs[Math.floor(Math.random() * blankInputs.length)];
+  const row = chosenInput.dataset.row;
+  const col = chosenInput.dataset.col;
+  try {
+    const data = await requestHint(row, col);
+    chosenInput.value = data.value;
+    chosenInput.disabled = true;
+    chosenInput.className = `sudoku-cell ${chosenInput.dataset.box} hinted`;
+    msg.className = 'success';
+    msg.innerText = 'Hint revealed!';
+  } catch (err) {
+    msg.className = 'error';
+    msg.innerText = err.message;
+  }
+}
+
 // Wire buttons
 window.addEventListener('load', () => {
   const storedTheme = localStorage.getItem('sudoku-theme');
   setTheme(storedTheme === 'dark');
 
   document.getElementById('new-game').addEventListener('click', newGame);
+  document.getElementById('hint-button').addEventListener('click', applyHint);
   document.getElementById('check-solution').addEventListener('click', checkSolution);
   document.getElementById('theme-toggle').addEventListener('click', () => {
     setTheme(!darkMode);

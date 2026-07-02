@@ -15,6 +15,9 @@
     --incorrect-bg: #ffcdd2;
     --message-error: #d32f2f;
     --message-success: #388e3c;
+    --hint-bg: #dbeafe;
+    --hint-border: #2563eb;
+    --hint-text: #1e3a8a;
 }
 
 body.theme-dark {
@@ -22,7 +25,7 @@ body.theme-dark {
     --page-bg: #111827;
     --page-text: #f3f4f6;
     --panel-bg: #1f2937;
-    --panel-border: #f3f4f6;
+    --panel-border: #f3faf6;
     --cell-border: #6b7280;
     --cell-bg-light: #374151;
     --cell-bg-dark: #1f2937;
@@ -34,6 +37,9 @@ body.theme-dark {
     --incorrect-bg: #7f1d1d;
     --message-error: #f28b82;
     --message-success: #86efac;
+    --hint-bg: #183c72;
+    --hint-border: #60a5fa;
+    --hint-text: #dbeafe;
 }
 
 body {
@@ -58,6 +64,12 @@ h1 {
     border: 4px solid var(--panel-border);
     background: var(--panel-bg);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .sudoku-row {
@@ -88,6 +100,13 @@ h1 {
 .sudoku-cell.prefilled {
     font-weight: 700;
     color: var(--cell-text);
+}
+
+.sudoku-cell.hinted {
+    border: 1px solid var(--hint-border);
+    background: var(--hint-bg);
+    color: var(--hint-text);
+    font-weight: 700;
 }
 
 .sudoku-cell.incorrect {
