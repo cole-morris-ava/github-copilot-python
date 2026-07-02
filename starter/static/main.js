@@ -116,7 +116,7 @@ function renderLeaderboard(entries) {
   if (!entries.length) {
     const emptyRow = document.createElement('tr');
     const emptyCell = document.createElement('td');
-    emptyCell.colSpan = 4;
+    emptyCell.colSpan = 5;
     emptyCell.textContent = 'No completed games yet.';
     emptyRow.appendChild(emptyCell);
     tbody.appendChild(emptyRow);
@@ -125,16 +125,55 @@ function renderLeaderboard(entries) {
   entries.forEach((entry, index) => {
     const row = document.createElement('tr');
     const rank = document.createElement('td');
+    const name = document.createElement('td');
     const time = document.createElement('td');
     const difficulty = document.createElement('td');
     const date = document.createElement('td');
+    
     rank.textContent = index + 1;
+    
+    // Name cell - editable only for newly added entries without a name
+    if (entry.isNewEntry && !entry.name) {
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.placeholder = 'Enter your name...';
+      nameInput.className = 'leaderboard-name-input';
+      nameInput.addEventListener('blur', () => {
+        if (nameInput.value.trim()) {
+          entry.name = nameInput.value.trim();
+          entry.isNewEntry = false;
+          saveLeaderboard(entries);
+          renderLeaderboard(entries);
+        }
+      });
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && nameInput.value.trim()) {
+          entry.name = nameInput.value.trim();
+          entry.isNewEntry = false;
+          saveLeaderboard(entries);
+          renderLeaderboard(entries);
+        }
+      });
+      name.appendChild(nameInput);
+      nameInput.focus();
+    } else {
+      name.textContent = entry.name || '-';
+    }
+    
     time.textContent = formatTime(entry.seconds);
     difficulty.textContent = entry.difficulty;
     date.textContent = entry.completedAt;
-    row.append(rank, time, difficulty, date);
+    row.append(rank, name, time, difficulty, date);
     tbody.appendChild(row);
   });
+}
+
+function saveLeaderboard(entries) {
+  try {
+    localStorage.setItem('sudoku-fast-times', JSON.stringify(entries));
+  } catch (err) {
+    // Ignore storage errors
+  }
 }
 
 function loadLeaderboard() {
@@ -147,16 +186,14 @@ function loadLeaderboard() {
 function saveFastTime(seconds) {
   const entries = getStoredFastTimes();
   entries.push({
+    name: '',
+    isNewEntry: true,
     seconds,
     difficulty: currentDifficulty,
     completedAt: new Date().toLocaleString()
   });
   const sortedEntries = entries.sort((a, b) => a.seconds - b.seconds).slice(0, 10);
-  try {
-    localStorage.setItem('sudoku-fast-times', JSON.stringify(sortedEntries));
-  } catch (err) {
-    // Ignore storage errors and keep the UI responsive.
-  }
+  saveLeaderboard(sortedEntries);
   renderLeaderboard(sortedEntries);
 }
 
