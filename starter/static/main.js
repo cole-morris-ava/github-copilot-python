@@ -1,6 +1,7 @@
 // Client-side rendering and interaction for the Flask-backed Sudoku
 const SIZE = 9;
 let puzzle = [];
+let darkMode = false;
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -12,9 +13,13 @@ function createBoardElement() {
       const input = document.createElement('input');
       input.type = 'text';
       input.maxLength = 1;
-      input.className = 'sudoku-cell';
+      const boxRow = Math.floor(i / 3);
+      const boxCol = Math.floor(j / 3);
+      const boxClass = (boxRow + boxCol) % 2 === 0 ? 'box-light' : 'box-dark';
+      input.className = `sudoku-cell ${boxClass}`;
       input.dataset.row = i;
       input.dataset.col = j;
+      input.dataset.box = boxClass;
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
@@ -23,6 +28,16 @@ function createBoardElement() {
     }
     boardDiv.appendChild(rowDiv);
   }
+}
+
+function setTheme(isDark) {
+  darkMode = isDark;
+  document.body.classList.toggle('theme-dark', isDark);
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    toggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+  }
+  localStorage.setItem('sudoku-theme', isDark ? 'dark' : 'light');
 }
 
 function renderPuzzle(puz) {
@@ -38,10 +53,11 @@ function renderPuzzle(puz) {
       if (val !== 0) {
         inp.value = val;
         inp.disabled = true;
-        inp.className += ' prefilled';
+        inp.className = `sudoku-cell ${inp.dataset.box} prefilled`;
       } else {
         inp.value = '';
         inp.disabled = false;
+        inp.className = `sudoku-cell ${inp.dataset.box}`;
       }
     }
   }
@@ -56,7 +72,9 @@ async function newGame() {
   const res = await fetch(`/new?difficulty=${encodeURIComponent(difficulty)}`);
   const data = await res.json();
   renderPuzzle(data.puzzle);
-  document.getElementById('message').innerText = '';
+  const msg = document.getElementById('message');
+  msg.innerText = '';
+  msg.className = '';
 }
 
 async function checkSolution() {
@@ -79,32 +97,38 @@ async function checkSolution() {
   const data = await res.json();
   const msg = document.getElementById('message');
   if (data.error) {
-    msg.style.color = '#d32f2f';
+    msg.className = 'error';
     msg.innerText = data.error;
     return;
   }
-  const incorrect = new Set(data.incorrect.map(x => x[0]*SIZE + x[1]));
+  const incorrect = new Set(data.incorrect.map(x => x[0] * SIZE + x[1]));
   for (let idx = 0; idx < inputs.length; idx++) {
     const inp = inputs[idx];
     if (inp.disabled) continue;
-    inp.className = 'sudoku-cell';
+    inp.className = `sudoku-cell ${inp.dataset.box}`;
     if (incorrect.has(idx)) {
-      inp.className = 'sudoku-cell incorrect';
+      inp.classList.add('incorrect');
     }
   }
   if (incorrect.size === 0) {
-    msg.style.color = '#388e3c';
+    msg.className = 'success';
     msg.innerText = 'Congratulations! You solved it!';
   } else {
-    msg.style.color = '#d32f2f';
+    msg.className = 'error';
     msg.innerText = 'Some cells are incorrect.';
   }
 }
 
 // Wire buttons
 window.addEventListener('load', () => {
+  const storedTheme = localStorage.getItem('sudoku-theme');
+  setTheme(storedTheme === 'dark');
+
   document.getElementById('new-game').addEventListener('click', newGame);
   document.getElementById('check-solution').addEventListener('click', checkSolution);
-  // initialize
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    setTheme(!darkMode);
+  });
+
   newGame();
 });

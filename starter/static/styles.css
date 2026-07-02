@@ -1,22 +1,63 @@
+:root {
+    color-scheme: light;
+    --page-bg: #f4f4f4;
+    --page-text: #1f2937;
+    --panel-bg: #ffffff;
+    --panel-border: #333333;
+    --cell-border: #bcbcbc;
+    --cell-bg-light: #f3f3f3;
+    --cell-bg-dark: #ffffff;
+    --cell-text: #1f2937;
+    --button-bg: #1976d2;
+    --button-hover: #1565c0;
+    --button-text: #ffffff;
+    --focus-bg: #e0f7fa;
+    --incorrect-bg: #ffcdd2;
+    --message-error: #d32f2f;
+    --message-success: #388e3c;
+}
+
+body.theme-dark {
+    color-scheme: dark;
+    --page-bg: #111827;
+    --page-text: #f3f4f6;
+    --panel-bg: #1f2937;
+    --panel-border: #f3f4f6;
+    --cell-border: #6b7280;
+    --cell-bg-light: #374151;
+    --cell-bg-dark: #1f2937;
+    --cell-text: #f3f4f6;
+    --button-bg: #4f46e5;
+    --button-hover: #4338ca;
+    --button-text: #f9fafb;
+    --focus-bg: #1e3a8a;
+    --incorrect-bg: #7f1d1d;
+    --message-error: #f28b82;
+    --message-success: #86efac;
+}
+
 body {
     font-family: Arial, sans-serif;
-    background: #f4f4f4;
+    background: var(--page-bg);
+    color: var(--page-text);
     text-align: center;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 h1 {
     margin-top: 30px;
-    color: #333;
+    color: var(--page-text);
 }
 
 #sudoku-board {
     display: inline-block;
     margin: 30px auto;
-    border: 4px solid #333;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 4px solid var(--panel-border);
+    background: var(--panel-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .sudoku-row {
@@ -26,60 +67,90 @@ h1 {
 .sudoku-cell {
     width: 40px;
     height: 40px;
-    border: 1px solid #bbb;
+    border: 1px solid var(--cell-border);
     text-align: center;
     font-size: 20px;
     outline: none;
-    background: #fafafa;
-    transition: background 0.2s;
+    background: var(--cell-bg-light);
+    color: var(--cell-text);
+    padding: 0;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sudoku-cell.box-dark {
+    background: var(--cell-bg-dark);
 }
 
 .sudoku-cell:focus {
-    background: #e0f7fa;
+    background: var(--focus-bg);
 }
 
 .sudoku-cell.prefilled {
-    background: #e0e0e0;
-    font-weight: bold;
-    color: #333;
+    font-weight: 700;
+    color: var(--cell-text);
 }
 
 .sudoku-cell.incorrect {
-    background: #ffcdd2;
+    background: var(--incorrect-bg);
 }
 
 .sudoku-cell:nth-child(3),
 .sudoku-cell:nth-child(6) {
-    border-right: 3px solid #333;
+    border-right: 3px solid var(--panel-border);
 }
 
 .sudoku-row:nth-child(3) .sudoku-cell,
 .sudoku-row:nth-child(6) .sudoku-cell {
-    border-bottom: 3px solid #333;
+    border-bottom: 3px solid var(--panel-border);
 }
 
 .controls {
     margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+label,
+select,
+#message {
+    color: var(--page-text);
+}
+
+select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--cell-border);
+    background: var(--panel-bg);
+    color: var(--page-text);
 }
 
 button {
     padding: 8px 18px;
-    margin: 0 8px;
     font-size: 16px;
     border: none;
-    background: #1976d2;
-    color: #fff;
+    background: var(--button-bg);
+    color: var(--button-text);
     border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s ease;
 }
 
 button:hover {
-    background: #1565c0;
+    background: var(--button-hover);
 }
 
 #message {
-    margin-left: 20px;
     font-size: 16px;
-    color: #d32f2f;
+    min-height: 1.2em;
+}
+
+#message.error {
+    color: var(--message-error);
+}
+
+#message.success {
+    color: var(--message-success);
 }
