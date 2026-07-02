@@ -13,6 +13,7 @@
     --button-text: #ffffff;
     --focus-bg: #e0f7fa;
     --incorrect-bg: #ffcdd2;
+    --conflict-bg: #fff59d;
     --message-error: #d32f2f;
     --message-success: #388e3c;
     --hint-bg: #dbeafe;
@@ -35,6 +36,7 @@ body.theme-dark {
     --button-text: #f9fafb;
     --focus-bg: #1e3a8a;
     --incorrect-bg: #7f1d1d;
+    --conflict-bg: #facc15;
     --message-error: #f28b82;
     --message-success: #86efac;
     --hint-bg: #183c72;
@@ -95,6 +97,24 @@ body {
 
 .sudoku-cell:focus {
     background: var(--focus-bg);
+}
+
+.sudoku-cell.conflict {
+    background: var(--conflict-bg);
+}
+
+.sudoku-cell.conflict:focus {
+    background: var(--conflict-bg);
+}
+
+.sudoku-cell.hinted.conflict {
+    background: var(--conflict-bg);
+    border: 1px solid var(--hint-border);
+    color: var(--hint-text);
+}
+
+.sudoku-cell.hinted.conflict:focus {
+    background: var(--conflict-bg);
 }
 
 .sudoku-cell.prefilled {

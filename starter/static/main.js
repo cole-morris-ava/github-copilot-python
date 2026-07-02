@@ -23,6 +23,7 @@ function createBoardElement() {
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
+        validateBoard();
       });
       rowDiv.appendChild(input);
     }
@@ -60,6 +61,71 @@ function renderPuzzle(puz) {
         inp.className = `sudoku-cell ${inp.dataset.box}`;
       }
     }
+  }
+}
+
+function validateBoard() {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = Array.from(boardDiv.getElementsByTagName('input'));
+  const board = [];
+
+  for (let i = 0; i < SIZE; i++) {
+    board[i] = [];
+    for (let j = 0; j < SIZE; j++) {
+      const idx = i * SIZE + j;
+      const value = inputs[idx].value;
+      board[i][j] = value ? parseInt(value, 10) : 0;
+    }
+  }
+
+  const conflicts = new Set();
+
+  for (let i = 0; i < SIZE; i++) {
+    for (let j = 0; j < SIZE; j++) {
+      const value = board[i][j];
+      if (!value) continue;
+
+      for (let x = 0; x < SIZE; x++) {
+        if (x !== j && board[i][x] === value) {
+          conflicts.add(i * SIZE + j);
+          conflicts.add(i * SIZE + x);
+        }
+        if (x !== i && board[x][j] === value) {
+          conflicts.add(i * SIZE + j);
+          conflicts.add(x * SIZE + j);
+        }
+      }
+
+      const startRow = Math.floor(i / 3) * 3;
+      const startCol = Math.floor(j / 3) * 3;
+      for (let row = startRow; row < startRow + 3; row++) {
+        for (let col = startCol; col < startCol + 3; col++) {
+          if ((row !== i || col !== j) && board[row][col] === value) {
+            conflicts.add(i * SIZE + j);
+            conflicts.add(row * SIZE + col);
+          }
+        }
+      }
+    }
+  }
+
+  inputs.forEach((input, idx) => {
+    input.classList.toggle('conflict', conflicts.has(idx));
+  });
+
+  const msg = document.getElementById('message');
+  if (conflicts.size > 0) {
+    msg.className = '';
+    msg.innerText = '';
+    return;
+  }
+
+  const allFilled = board.every((row) => row.every((value) => value !== 0));
+  if (allFilled) {
+    checkSolution();
+  } else {
+    msg.className = '';
+    msg.innerText = '';
   }
 }
 
