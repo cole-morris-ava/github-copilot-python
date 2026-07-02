@@ -2,6 +2,10 @@
 const SIZE = 9;
 let puzzle = [];
 let darkMode = false;
+let timerInterval = null;
+let startTime = null;
+let gameCompleted = false;
+let currentDifficulty = 'medium';
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -62,6 +66,109 @@ function renderPuzzle(puz) {
       }
     }
   }
+}
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateTimerDisplay() {
+  const timerEl = document.getElementById('timer');
+  if (!timerEl) return;
+  if (!startTime || gameCompleted) {
+    timerEl.textContent = `Time: ${formatTime(0)}`;
+    return;
+  }
+  const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+  timerEl.textContent = `Time: ${formatTime(elapsedSeconds)}`;
+}
+
+function startTimer() {
+  stopTimer();
+  gameCompleted = false;
+  startTime = Date.now();
+  updateTimerDisplay();
+  timerInterval = window.setInterval(updateTimerDisplay, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    window.clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function getStoredFastTimes() {
+  try {
+    const stored = localStorage.getItem('sudoku-fast-times');
+    return stored ? JSON.parse(stored) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function renderLeaderboard(entries) {
+  const tbody = document.getElementById('leaderboard-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (!entries.length) {
+    const emptyRow = document.createElement('tr');
+    const emptyCell = document.createElement('td');
+    emptyCell.colSpan = 4;
+    emptyCell.textContent = 'No completed games yet.';
+    emptyRow.appendChild(emptyCell);
+    tbody.appendChild(emptyRow);
+    return;
+  }
+  entries.forEach((entry, index) => {
+    const row = document.createElement('tr');
+    const rank = document.createElement('td');
+    const time = document.createElement('td');
+    const difficulty = document.createElement('td');
+    const date = document.createElement('td');
+    rank.textContent = index + 1;
+    time.textContent = formatTime(entry.seconds);
+    difficulty.textContent = entry.difficulty;
+    date.textContent = entry.completedAt;
+    row.append(rank, time, difficulty, date);
+    tbody.appendChild(row);
+  });
+}
+
+function loadLeaderboard() {
+  const entries = getStoredFastTimes()
+    .slice(0, 10)
+    .sort((a, b) => a.seconds - b.seconds);
+  renderLeaderboard(entries);
+}
+
+function saveFastTime(seconds) {
+  const entries = getStoredFastTimes();
+  entries.push({
+    seconds,
+    difficulty: currentDifficulty,
+    completedAt: new Date().toLocaleString()
+  });
+  const sortedEntries = entries.sort((a, b) => a.seconds - b.seconds).slice(0, 10);
+  try {
+    localStorage.setItem('sudoku-fast-times', JSON.stringify(sortedEntries));
+  } catch (err) {
+    // Ignore storage errors and keep the UI responsive.
+  }
+  renderLeaderboard(sortedEntries);
+}
+
+function completeGame() {
+  if (gameCompleted) return;
+  gameCompleted = true;
+  stopTimer();
+  if (startTime) {
+    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+    saveFastTime(elapsedSeconds);
+  }
+  updateTimerDisplay();
 }
 
 function validateBoard() {
@@ -134,10 +241,11 @@ function getSelectedDifficulty() {
 }
 
 async function newGame() {
-  const difficulty = getSelectedDifficulty();
-  const res = await fetch(`/new?difficulty=${encodeURIComponent(difficulty)}`);
+  currentDifficulty = getSelectedDifficulty();
+  const res = await fetch(`/new?difficulty=${encodeURIComponent(currentDifficulty)}`);
   const data = await res.json();
   renderPuzzle(data.puzzle);
+  startTimer();
   const msg = document.getElementById('message');
   msg.innerText = '';
   msg.className = '';
@@ -179,6 +287,7 @@ async function checkSolution() {
   if (incorrect.size === 0) {
     msg.className = 'success';
     msg.innerText = 'Congratulations! You solved it!';
+    completeGame();
   } else {
     msg.className = 'error';
     msg.innerText = 'Some cells are incorrect.';
@@ -232,5 +341,6 @@ window.addEventListener('load', () => {
     setTheme(!darkMode);
   });
 
+  loadLeaderboard();
   newGame();
 });
