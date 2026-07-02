@@ -5,6 +5,7 @@ import unittest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import app
+import sudoku_logic
 
 
 class DifficultyTests(unittest.TestCase):
@@ -31,6 +32,11 @@ class DifficultyTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.get_json()
         self.assertEqual(self.count_clues(data['puzzle']), 30)
+
+    def test_generated_puzzle_has_unique_solution(self):
+        puzzle, solution = sudoku_logic.generate_puzzle(clues=35)
+        self.assertTrue(sudoku_logic.has_unique_solution(puzzle))
+        self.assertEqual(len(solution), sudoku_logic.SIZE)
 
 
 if __name__ == '__main__':
