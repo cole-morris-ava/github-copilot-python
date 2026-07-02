@@ -19,6 +19,13 @@ class TimerUiTests(unittest.TestCase):
         self.assertIn('id="leaderboard-table"', html)
         self.assertIn('Top 10 Fastest Times', html)
 
+    def test_index_page_has_dedicated_message_area(self):
+        response = self.client.get('/')
+        html = response.get_data(as_text=True)
+        self.assertIn('class="controls-row"', html)
+        self.assertIn('class="message-area"', html)
+        self.assertIn('id="message"', html)
+
 
 if __name__ == '__main__':
     unittest.main()

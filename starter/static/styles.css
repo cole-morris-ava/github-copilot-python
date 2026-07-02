@@ -146,6 +146,14 @@ body {
 .controls {
     margin: 20px auto;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.controls-row {
+    display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
@@ -167,6 +175,7 @@ select {
 }
 
 button {
+    min-height: 44px;
     padding: 8px 18px;
     font-size: 16px;
     border: none;
@@ -175,15 +184,27 @@ button {
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 button:hover {
     background: var(--button-hover);
 }
 
+.message-area {
+    min-height: 1.6em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
 #message {
     font-size: 16px;
     min-height: 1.2em;
+    display: block;
 }
 
 #message.error {
